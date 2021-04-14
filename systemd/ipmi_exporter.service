@@ -1,0 +1,8 @@
+[Unit]
+Description=IPMI Prometheus Exporter
+
+[Service]
+ExecStart=/opt/ipmi_exporter/ipmi_exporter --config.file /opt/ipmi_exporter/ipmi_remote.yml --freeipmi.path /usr/sbin --web.listen-address ":9290"
+
+[Install]
+WantedBy=multi-user.target
