@@ -35,6 +35,7 @@ var (
 	bmcInfoFirmwareRevisionRegex      = regexp.MustCompile(`^Firmware Revision\s*:\s*(?P<value>[0-9.]*).*`)
 	bmcInfoSystemFirmwareVersionRegex = regexp.MustCompile(`^System Firmware Version\s*:\s*(?P<value>[0-9.]*).*`)
 	bmcInfoManufacturerIDRegex        = regexp.MustCompile(`^Manufacturer ID\s*:\s*(?P<value>.*)`)
+	bmcInfoSystemNameRegex            = regexp.MustCompile(`^System Name\s*:\s*(?P<value>.*)`)
 )
 
 type collector struct {
@@ -377,6 +378,10 @@ func getChassisPowerState(ipmiOutput []byte) (float64, error) {
 	return 0, err
 }
 
+func getBMCInfoSystemName(ipmiOutput []byte) (string, error) {
+	return getValue(ipmiOutput, bmcInfoSystemNameRegex)
+}
+
 func getBMCInfoFirmwareRevision(ipmiOutput []byte) (string, error) {
 	return getValue(ipmiOutput, bmcInfoFirmwareRevisionRegex)
 }
@@ -593,6 +598,11 @@ func collectBmcInfo(ch chan<- prometheus.Metric, target ipmiTarget) (int, error)
 		log.Errorf("Failed to parse bmc-info data from %s: %s", targetName(target.host), err)
 		return 0, err
 	}
+	systemName, err := getBMCInfoSystemName(output)
+	if err != nil {
+		log.Errorf("Failed to parse bmc-info data from %s: %s", targetName(target.host), err)
+		return 0, err
+	}
 	manufacturerID, err := getBMCInfoManufacturerID(output)
 	if err != nil {
 		log.Errorf("Failed to parse bmc-info data from %s: %s", targetName(target.host), err)
@@ -608,7 +618,7 @@ func collectBmcInfo(ch chan<- prometheus.Metric, target ipmiTarget) (int, error)
 		bmcInfo,
 		prometheus.GaugeValue,
 		1,
-		firmwareRevision, manufacturerID, systemFirmwareVersion,
+		firmwareRevision, manufacturerID, systemFirmwareVersion, systemName,
 	)
 	return 1, nil
 }
