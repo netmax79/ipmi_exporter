@@ -161,7 +161,7 @@ var (
 	bmcInfo = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "bmc", "info"),
 		"Constant metric with value '1' providing details about the BMC.",
-		[]string{"firmware_revision", "manufacturer_id", "system_firmware_version"},
+		[]string{"firmware_revision", "manufacturer_id", "system_firmware_version", "system_name"},
 		nil,
 	)
 
